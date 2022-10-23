@@ -10,8 +10,11 @@ import org.example.model.mapbox.FeatureCollection;
 import org.example.model.openweather.Weather;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.logging.Level;
@@ -50,6 +53,7 @@ public class App {
      * @return
      */
     private static URI buildMapBoxURI(String location)  {
+
         final String mapboxBaseURL = "https://api.mapbox.com/geocoding/v5/mapbox.places/";
         final String mapboxAPIKey = System.getenv("mapboxAPIKey");
 
@@ -57,16 +61,22 @@ public class App {
             throw new RuntimeException("Invalid Mapbox API Key");
         }
 
-        String mapboxURI = mapboxBaseURL + location + ".json";
+
         URIBuilder uriBuilder = null;
         URI uri = null;
         try {
+            location = URLEncoder.encode(location, StandardCharsets.UTF_8.toString());
+
+            String mapboxURI = mapboxBaseURL + location + ".json";
             uriBuilder = new URIBuilder(mapboxURI);
             uriBuilder.addParameter("limit", "1");
             uriBuilder.addParameter("access_token", mapboxAPIKey);
             uri = uriBuilder.build();
         } catch (URISyntaxException e) {
+            e.printStackTrace();
             throw new RuntimeException("Exception in building URI for MapBox API");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Exception in encoding location");
         }
 
         Logger.getAnonymousLogger().log(Level.INFO, uri.toString());
@@ -100,7 +110,7 @@ public class App {
             throw new RuntimeException("Unable to retrieve coordinates for this location");
         }
 
-        Logger.getAnonymousLogger().log(Level.INFO, response.toString());
+//        Logger.getAnonymousLogger().log(Level.INFO, response.toString());
 
         return response;
     }
@@ -133,7 +143,7 @@ public class App {
             throw new RuntimeException("Exception in building URI for Weather API");
         }
 
-        Logger.getAnonymousLogger().log(Level.INFO, uri.toString());
+//        Logger.getAnonymousLogger().log(Level.INFO, uri.toString());
         return uri;
     }
 
@@ -164,7 +174,7 @@ public class App {
             throw new RuntimeException("Unable to retrieve weather for this location");
         }
 
-        Logger.getAnonymousLogger().log(Level.INFO, response.toString());
+//        Logger.getAnonymousLogger().log(Level.INFO, response.toString());
 
         return response;
     }
